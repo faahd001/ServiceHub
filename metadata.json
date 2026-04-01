@@ -1,5 +1,5 @@
 {
-  "name": "ServiceHub",
-  "description": "A platform connecting service providers like engineers, mechanics, and plumbers with customers for easy booking and communication.",
-  "requestFramePermissions": []
+  "name": "ConnectPro",
+  "description": "A full-stack platform connecting customers with service providers. Features include user registration, profession-based search, booking system, real-time chat, and reviews.",
+  "requestFramePermissions": ["geolocation"]
 }

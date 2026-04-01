@@ -79,7 +79,7 @@ export default function Register() {
             <Hammer className="w-8 h-8" />
           </motion.div>
           <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Create Account</h1>
-          <p className="text-gray-500 mt-2 text-lg">Join ServiceHub to find or offer expert services</p>
+          <p className="text-gray-500 mt-2 text-lg">Join ConnectPro to find or offer expert services</p>
         </div>
 
         <div className="grid grid-cols-2 gap-4 mb-10">

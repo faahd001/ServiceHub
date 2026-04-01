@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { collection, query, where, onSnapshot, orderBy, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../components/AuthContext';
 import { Booking, ProviderProfile, UserProfile } from '../types';
@@ -7,11 +8,15 @@ import { Calendar, Clock, CheckCircle2, XCircle, MessageSquare, Star } from 'luc
 import { format } from 'date-fns';
 import { cn } from '../lib/utils';
 import Button from '../components/ui/Button';
+import ReviewModal from '../components/ReviewModal';
 
 export default function CustomerDashboard() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -33,6 +38,42 @@ export default function CustomerDashboard() {
     return () => unsubscribe();
   }, [user]);
 
+  const handleReviewClick = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsReviewModalOpen(true);
+  };
+
+  const handleChatClick = async (providerId: string) => {
+    if (!user) return;
+    try {
+      const q = query(
+        collection(db, 'chatRooms'),
+        where('participants', 'array-contains', user.uid)
+      );
+      const snapshot = await getDocs(q);
+      let roomId = '';
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.participants.includes(providerId)) {
+          roomId = doc.id;
+        }
+      });
+
+      if (!roomId) {
+        const roomDoc = await addDoc(collection(db, 'chatRooms'), {
+          participants: [user.uid, providerId],
+          createdAt: new Date().toISOString(),
+          lastMessage: '',
+          lastMessageTimestamp: new Date().toISOString()
+        });
+        roomId = roomDoc.id;
+      }
+      navigate(`/chat/${roomId}`);
+    } catch (error) {
+      console.error("Error initiating chat:", error);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-100';
@@ -45,7 +86,7 @@ export default function CustomerDashboard() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="text-center max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900">Customer Dashboard</h1>
         <p className="text-gray-500 mt-2">Manage your service requests and bookings</p>
       </div>
@@ -102,12 +143,22 @@ export default function CustomerDashboard() {
                 </span>
                 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => handleChatClick(booking.providerId)}
+                  >
                     <MessageSquare className="w-4 h-4" />
                     Chat
                   </Button>
-                  {booking.status === 'completed' && (
-                    <Button variant="primary" size="sm" className="gap-2">
+                  {booking.status === 'completed' && !booking.reviewed && (
+                    <Button 
+                      variant="primary" 
+                      size="sm" 
+                      className="gap-2"
+                      onClick={() => handleReviewClick(booking)}
+                    >
                       <Star className="w-4 h-4" />
                       Review
                     </Button>
@@ -130,6 +181,15 @@ export default function CustomerDashboard() {
           )}
         </div>
       </div>
+
+      {selectedBooking && (
+        <ReviewModal
+          isOpen={isReviewModalOpen}
+          onClose={() => setIsReviewModalOpen(false)}
+          bookingId={selectedBooking.id}
+          providerId={selectedBooking.providerId}
+        />
+      )}
     </div>
   );
 }

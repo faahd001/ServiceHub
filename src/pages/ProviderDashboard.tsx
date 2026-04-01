@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { collection, query, where, onSnapshot, orderBy, updateDoc, doc } from 'firebase/firestore';
+import { useNavigate } from 'react-router-dom';
+import { collection, query, where, onSnapshot, orderBy, updateDoc, doc, getDocs, addDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { useAuth } from '../components/AuthContext';
 import { useNotifications } from '../components/NotificationContext';
@@ -11,6 +12,7 @@ import Button from '../components/ui/Button';
 
 export default function ProviderDashboard() {
   const { user, profile } = useAuth();
+  const navigate = useNavigate();
   const { sendNotification } = useNotifications();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filter, setFilter] = useState<string>('all');
@@ -71,6 +73,37 @@ export default function ProviderDashboard() {
     }
   };
 
+  const handleChatClick = async (customerId: string) => {
+    if (!user) return;
+    try {
+      const q = query(
+        collection(db, 'chatRooms'),
+        where('participants', 'array-contains', user.uid)
+      );
+      const snapshot = await getDocs(q);
+      let roomId = '';
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.participants.includes(customerId)) {
+          roomId = doc.id;
+        }
+      });
+
+      if (!roomId) {
+        const roomDoc = await addDoc(collection(db, 'chatRooms'), {
+          participants: [user.uid, customerId],
+          createdAt: new Date().toISOString(),
+          lastMessage: '',
+          lastMessageTimestamp: new Date().toISOString()
+        });
+        roomId = roomDoc.id;
+      }
+      navigate(`/chat/${roomId}`);
+    } catch (error) {
+      console.error("Error initiating chat:", error);
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-50 text-yellow-700 border-yellow-100';
@@ -83,12 +116,12 @@ export default function ProviderDashboard() {
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-between items-end">
-        <div>
+      <div className="flex flex-col items-center text-center gap-6">
+        <div className="max-w-2xl">
           <h1 className="text-3xl font-bold text-gray-900">Provider Dashboard</h1>
           <p className="text-gray-500 mt-2">Manage your jobs, profile, and earnings</p>
         </div>
-        <Button variant="outline" className="gap-2">
+        <Button variant="outline" className="gap-2 rounded-2xl">
           <Settings className="w-4 h-4" />
           Profile Settings
         </Button>
@@ -124,6 +157,44 @@ export default function ProviderDashboard() {
           <div className="text-3xl font-bold text-gray-900">
             {providerData?.rating.toFixed(1) || "0.0"}
           </div>
+        </div>
+      </div>
+
+      {/* Booking Summary Section */}
+      <div className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Booking Summary</h2>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {[
+            { label: 'Pending', status: 'pending', color: 'bg-yellow-500', icon: Clock },
+            { label: 'Ongoing', status: 'ongoing', color: 'bg-blue-500', icon: Briefcase },
+            { label: 'Completed', status: 'completed', color: 'bg-green-500', icon: CheckCircle2 },
+            { label: 'Cancelled', status: 'cancelled', color: 'bg-red-500', icon: XCircle },
+          ].map((item) => {
+            const count = bookings.filter(b => b.status === item.status).length;
+            const total = bookings.length || 1;
+            const percentage = Math.round((count / total) * 100);
+            
+            return (
+              <div key={item.status} className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className={cn("w-2 h-2 rounded-full", item.color)} />
+                    <span className="text-sm font-medium text-gray-600">{item.label}</span>
+                  </div>
+                  <span className="text-sm font-bold text-gray-900">{count}</span>
+                </div>
+                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                  <div 
+                    className={cn("h-full transition-all duration-500", item.color)} 
+                    style={{ width: `${percentage}%` }}
+                  />
+                </div>
+                <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">
+                  {percentage}% of total bookings
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -201,7 +272,12 @@ export default function ProviderDashboard() {
                 </span>
                 
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2"
+                    onClick={() => handleChatClick(booking.customerId)}
+                  >
                     <MessageSquare className="w-4 h-4" />
                     Chat
                   </Button>

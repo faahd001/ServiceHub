@@ -37,6 +37,7 @@ export interface Booking {
   serviceId: string;
   status: BookingStatus;
   date: string;
+  reviewed?: boolean;
   createdAt: string;
 }
 
@@ -46,6 +47,13 @@ export interface Message {
   receiverId: string;
   message: string;
   timestamp: string;
+}
+
+export interface ChatRoom {
+  id: string;
+  participants: string[];
+  lastMessage?: string;
+  lastMessageTimestamp?: string;
 }
 
 export interface Review {

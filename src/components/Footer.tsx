@@ -2,13 +2,13 @@ import { Hammer } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-white border-t py-12">
+    <footer className="bg-white border-t py-12 transition-colors duration-300">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-2 text-blue-600 font-bold text-xl mb-4">
               <Hammer className="w-6 h-6" />
-              <span>ServiceHub</span>
+              <span>ConnectPro</span>
             </div>
             <p className="text-gray-500 max-w-sm">
               Connecting skilled service providers with customers who need their expertise. 
@@ -36,7 +36,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t mt-12 pt-8 text-center text-gray-400 text-sm">
-          © {new Date().getFullYear()} ServiceHub. All rights reserved.
+          © {new Date().getFullYear()} ConnectPro. All rights reserved.
         </div>
       </div>
     </footer>

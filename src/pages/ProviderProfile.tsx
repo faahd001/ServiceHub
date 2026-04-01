@@ -62,6 +62,47 @@ export default function ProviderProfilePage() {
     }
   };
 
+  const handleMessage = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (!id || !provider) return;
+
+    try {
+      // Check if a chat room already exists between these two users
+      const q = query(
+        collection(db, 'chatRooms'),
+        where('participants', 'array-contains', user.uid)
+      );
+      
+      const snapshot = await getDocs(q);
+      let roomId = '';
+      
+      snapshot.docs.forEach(doc => {
+        const data = doc.data();
+        if (data.participants.includes(provider.userId)) {
+          roomId = doc.id;
+        }
+      });
+
+      if (!roomId) {
+        // Create new chat room
+        const roomDoc = await addDoc(collection(db, 'chatRooms'), {
+          participants: [user.uid, provider.userId],
+          createdAt: new Date().toISOString(),
+          lastMessage: '',
+          lastMessageTimestamp: new Date().toISOString()
+        });
+        roomId = roomDoc.id;
+      }
+
+      navigate(`/chat/${roomId}`);
+    } catch (error) {
+      console.error("Error initiating chat:", error);
+    }
+  };
+
   const handleWhatsAppClick = () => {
     if (userData?.phone) {
       const formattedPhone = userData.phone.replace(/\D/g, '');
@@ -114,8 +155,8 @@ export default function ProviderProfilePage() {
     <div className="max-w-5xl mx-auto space-y-8">
       {/* Header Card */}
       <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-8 items-start">
-          <div className="w-32 h-32 rounded-3xl bg-gray-100 overflow-hidden flex-shrink-0">
+        <div className="flex flex-col items-center text-center gap-8">
+          <div className="w-40 h-40 rounded-3xl bg-gray-100 overflow-hidden flex-shrink-0 shadow-inner">
             <img 
               src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${userData.name}`} 
               alt={userData.name}
@@ -123,68 +164,68 @@ export default function ProviderProfilePage() {
             />
           </div>
           
-          <div className="flex-grow space-y-4">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-3xl font-bold text-gray-900">{userData.name}</h1>
-                  <ShieldCheck className="w-6 h-6 text-blue-500" />
-                </div>
-                <div className="flex flex-wrap items-center gap-4 text-gray-500 mt-2">
-                  <div className="flex items-center gap-1">
-                    <Briefcase className="w-4 h-4" />
-                    <span>{provider.profession}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" />
-                    <span>{userData.location || "Location not set"}</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Calendar className="w-4 h-4" />
-                    <span>{provider.experience} years experience</span>
-                  </div>
-                </div>
+          <div className="w-full space-y-6">
+            <div className="flex flex-col items-center gap-4">
+              <div className="flex items-center gap-2">
+                <h1 className="text-4xl font-bold text-gray-900">{userData.name}</h1>
+                <ShieldCheck className="w-8 h-8 text-blue-500" />
               </div>
-              
-              <div className="flex items-center gap-3">
-                {userData.phone && (
-                  <Button 
-                    variant="outline" 
-                    className="gap-2 border-green-200 text-green-700 hover:bg-green-50"
-                    onClick={handleWhatsAppClick}
-                  >
-                    <Phone className="w-4 h-4" />
-                    WhatsApp
-                  </Button>
-                )}
-                <Button variant="outline" className="gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  Message
-                </Button>
-                <Button 
-                  className="gap-2"
-                  onClick={handleBookNow}
-                  disabled={bookingLoading || bookingSuccess}
-                >
-                  {bookingLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : bookingSuccess ? (
-                    <CheckCircle2 className="w-4 h-4" />
-                  ) : null}
-                  {bookingSuccess ? 'Booked!' : 'Book Now'}
-                </Button>
+              <div className="flex flex-wrap justify-center items-center gap-6 text-gray-500 font-medium">
+                <div className="flex items-center gap-2">
+                  <Briefcase className="w-5 h-5 text-blue-500" />
+                  <span>{provider.profession}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5 text-blue-500" />
+                  <span>{userData.location || "Location not set"}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-blue-500" />
+                  <span>{provider.experience} years experience</span>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-6 pt-4 border-t border-gray-50">
-              <div className="flex items-center gap-1">
-                <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                <span className="text-lg font-bold text-gray-900">{provider.rating.toFixed(1)}</span>
-                <span className="text-gray-500">({provider.totalReviews} reviews)</span>
+            <div className="flex flex-wrap justify-center items-center gap-4 pt-2">
+              {userData.phone && (
+                <Button 
+                  variant="outline" 
+                  className="gap-2 border-green-200 text-green-700 hover:bg-green-50 rounded-2xl px-6"
+                  onClick={handleWhatsAppClick}
+                >
+                  <Phone className="w-4 h-4" />
+                  WhatsApp
+                </Button>
+              )}
+                <Button variant="outline" className="gap-2 rounded-2xl px-6" onClick={handleMessage}>
+                  <MessageSquare className="w-4 h-4" />
+                  Message
+                </Button>
+              <Button 
+                className="gap-2 rounded-2xl px-8"
+                onClick={handleBookNow}
+                disabled={bookingLoading || bookingSuccess}
+              >
+                {bookingLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : bookingSuccess ? (
+                  <CheckCircle2 className="w-4 h-4" />
+                ) : null}
+                {bookingSuccess ? 'Booked!' : 'Book Now'}
+              </Button>
+            </div>
+            
+            <div className="flex justify-center items-center gap-12 pt-6 border-t border-gray-50">
+              <div className="flex flex-col items-center gap-1">
+                <div className="flex items-center gap-1">
+                  <Star className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                  <span className="text-2xl font-bold text-gray-900">{provider.rating.toFixed(1)}</span>
+                </div>
+                <span className="text-sm text-gray-500">({provider.totalReviews} reviews)</span>
               </div>
-              <div className="flex items-center gap-1">
-                <span className="text-lg font-bold text-gray-900">100%</span>
-                <span className="text-gray-500">Job success</span>
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-2xl font-bold text-gray-900">100%</span>
+                <span className="text-sm text-gray-500">Job success</span>
               </div>
             </div>
           </div>

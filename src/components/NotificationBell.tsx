@@ -34,11 +34,11 @@ export default function NotificationBell() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
+        className="relative p-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-full transition-colors"
       >
         <Bell className="w-6 h-6" />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+          <span className="absolute top-1 right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white dark:border-gray-900">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -50,14 +50,14 @@ export default function NotificationBell() {
             initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-900 rounded-2xl shadow-xl border border-gray-100 dark:border-gray-800 overflow-hidden z-50"
           >
-            <div className="p-4 border-b border-gray-50 flex justify-between items-center bg-gray-50/50">
-              <h3 className="font-bold text-gray-900">Notifications</h3>
+            <div className="p-4 border-b border-gray-50 dark:border-gray-800 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50">
+              <h3 className="font-bold text-gray-900 dark:text-white">Notifications</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={() => markAllAsRead()}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                  className="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 font-medium flex items-center gap-1"
                 >
                   <Check className="w-3 h-3" />
                   Mark all as read
@@ -65,14 +65,14 @@ export default function NotificationBell() {
               )}
             </div>
 
-            <div className="max-h-[400px] overflow-y-auto divide-y divide-gray-50">
+            <div className="max-h-[400px] overflow-y-auto divide-y divide-gray-50 dark:divide-gray-800">
               {notifications.length > 0 ? (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
                     className={cn(
-                      "p-4 hover:bg-gray-50 transition-colors cursor-pointer relative",
-                      !notification.read && "bg-blue-50/30"
+                      "p-4 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors cursor-pointer relative",
+                      !notification.read && "bg-blue-50/30 dark:bg-blue-900/20"
                     )}
                     onClick={() => {
                       if (!notification.read) markAsRead(notification.id);
@@ -81,21 +81,21 @@ export default function NotificationBell() {
                   >
                     <Link to={notification.link || '#'} className="flex gap-3">
                       <div className="mt-1 flex-shrink-0">
-                        <div className="w-8 h-8 rounded-lg bg-white border border-gray-100 flex items-center justify-center shadow-sm">
+                        <div className="w-8 h-8 rounded-lg bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 flex items-center justify-center shadow-sm">
                           {getIcon(notification.type)}
                         </div>
                       </div>
                       <div className="flex-grow min-w-0">
                         <p className={cn(
-                          "text-sm text-gray-900 leading-snug",
+                          "text-sm text-gray-900 dark:text-white leading-snug",
                           !notification.read ? "font-bold" : "font-medium"
                         )}>
                           {notification.title}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[10px] text-gray-400 mt-2">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500 mt-2">
                           {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true })}
                         </p>
                       </div>
@@ -107,15 +107,15 @@ export default function NotificationBell() {
                 ))
               ) : (
                 <div className="p-8 text-center">
-                  <Bell className="w-8 h-8 text-gray-200 mx-auto mb-3" />
-                  <p className="text-sm text-gray-500">No notifications yet</p>
+                  <Bell className="w-8 h-8 text-gray-200 dark:text-gray-700 mx-auto mb-3" />
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No notifications yet</p>
                 </div>
               )}
             </div>
 
             {notifications.length > 0 && (
-              <div className="p-3 border-t border-gray-50 text-center bg-gray-50/30">
-                <button className="text-xs text-gray-500 hover:text-gray-700 font-medium">
+              <div className="p-3 border-t border-gray-50 dark:border-gray-800 text-center bg-gray-50/30 dark:bg-gray-800/30">
+                <button className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 font-medium">
                   View all notifications
                 </button>
               </div>

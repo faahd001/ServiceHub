@@ -20,9 +20,9 @@ export default function ProviderCard({ provider, user }: ProviderCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 p-6 hover:shadow-xl transition-all group relative">
+    <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-6 hover:shadow-xl transition-all group relative">
       <div className="flex gap-6">
-        <div className="w-24 h-24 rounded-2xl bg-gray-100 overflow-hidden flex-shrink-0">
+        <div className="w-24 h-24 rounded-2xl bg-gray-100 dark:bg-gray-800 overflow-hidden flex-shrink-0">
           <img 
             src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`} 
             alt={user.name}
@@ -33,30 +33,30 @@ export default function ProviderCard({ provider, user }: ProviderCardProps) {
         <div className="flex-grow">
           <div className="flex justify-between items-start">
             <div>
-              <h3 className="text-xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors">
                 {user.name}
               </h3>
-              <div className="flex items-center gap-2 text-gray-500 text-sm mt-1">
+              <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 text-sm mt-1">
                 <Briefcase className="w-4 h-4" />
                 <span>{provider.profession}</span>
-                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span className="w-1 h-1 bg-gray-300 dark:bg-gray-700 rounded-full"></span>
                 <span>{provider.experience} years exp.</span>
               </div>
             </div>
-            <div className="flex items-center gap-1 bg-yellow-50 text-yellow-700 px-2 py-1 rounded-lg text-sm font-bold">
+            <div className="flex items-center gap-1 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-500 px-2 py-1 rounded-lg text-sm font-bold">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
               <span>{provider.rating.toFixed(1)}</span>
               <span className="text-yellow-500 font-normal">({provider.totalReviews})</span>
             </div>
           </div>
 
-          <p className="mt-4 text-gray-600 line-clamp-2 text-sm leading-relaxed">
+          <p className="mt-4 text-gray-600 dark:text-gray-400 line-clamp-2 text-sm leading-relaxed">
             {provider.description || "No description provided."}
           </p>
 
           <div className="mt-6 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1 text-gray-500 text-sm">
+              <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400 text-sm">
                 <MapPin className="w-4 h-4" />
                 <span>{user.location || "Location not set"}</span>
               </div>
