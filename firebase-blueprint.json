@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Base user profile for both customers and providers.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "role": { "type": "string", "enum": ["customer", "provider", "admin"], "description": "User role" },
+        "location": { "type": "string", "description": "User's primary location" },
+        "phone": { "type": "string", "description": "User's phone number" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account creation timestamp" }
+      },
+      "required": ["name", "email", "role"]
+    },
+    "Provider": {
+      "title": "Provider",
+      "description": "Detailed profile for service providers.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Reference to the User document ID" },
+        "profession": { "type": "string", "description": "Main profession (e.g., Engineer, Mechanic)" },
+        "experience": { "type": "number", "description": "Years of experience" },
+        "description": { "type": "string", "description": "Bio or service description" },
+        "rating": { "type": "number", "description": "Average rating (0-5)" },
+        "totalReviews": { "type": "number", "description": "Number of reviews received" }
+      },
+      "required": ["userId", "profession"]
+    },
+    "Service": {
+      "title": "Service",
+      "description": "Specific services offered by a provider.",
+      "type": "object",
+      "properties": {
+        "providerId": { "type": "string", "description": "Reference to the Provider document ID" },
+        "title": { "type": "string", "description": "Service title" },
+        "description": { "type": "string", "description": "Service details" },
+        "price": { "type": "number", "description": "Base price for the service" }
+      },
+      "required": ["providerId", "title", "price"]
+    },
+    "Booking": {
+      "title": "Booking",
+      "description": "Service booking records.",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string", "description": "Reference to the User ID (customer)" },
+        "providerId": { "type": "string", "description": "Reference to the Provider ID" },
+        "serviceId": { "type": "string", "description": "Reference to the Service ID" },
+        "status": { "type": "string", "enum": ["pending", "ongoing", "completed", "cancelled"], "description": "Booking status" },
+        "date": { "type": "string", "format": "date-time", "description": "Scheduled date for the service" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Booking creation timestamp" }
+      },
+      "required": ["customerId", "providerId", "serviceId", "status", "date"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Chat messages between users.",
+      "type": "object",
+      "properties": {
+        "senderId": { "type": "string", "description": "Sender User ID" },
+        "receiverId": { "type": "string", "description": "Receiver User ID" },
+        "message": { "type": "string", "description": "Message content" },
+        "timestamp": { "type": "string", "format": "date-time", "description": "Message sent time" }
+      },
+      "required": ["senderId", "receiverId", "message", "timestamp"]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "Customer reviews for providers.",
+      "type": "object",
+      "properties": {
+        "customerId": { "type": "string", "description": "Reviewer User ID" },
+        "providerId": { "type": "string", "description": "Provider ID being reviewed" },
+        "rating": { "type": "number", "description": "Rating (1-5)" },
+        "comment": { "type": "string", "description": "Review comment" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Review timestamp" }
+      },
+      "required": ["customerId", "providerId", "rating", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "User notifications for booking updates and messages.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Recipient User ID" },
+        "type": { "type": "string", "enum": ["booking_request", "booking_status", "message"], "description": "Notification type" },
+        "title": { "type": "string", "description": "Notification title" },
+        "message": { "type": "string", "description": "Notification message" },
+        "link": { "type": "string", "description": "Optional link to redirect the user" },
+        "read": { "type": "boolean", "description": "Whether the notification has been read" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Notification timestamp" }
+      },
+      "required": ["userId", "type", "title", "message", "read", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": { "schema": "User", "description": "User profiles" },
+    "/providers/{providerId}": { "schema": "Provider", "description": "Provider details" },
+    "/services/{serviceId}": { "schema": "Service", "description": "Offered services" },
+    "/bookings/{bookingId}": { "schema": "Booking", "description": "Booking records" },
+    "/messages/{messageId}": { "schema": "Message", "description": "Chat history" },
+    "/reviews/{reviewId}": { "schema": "Review", "description": "Customer reviews" },
+    "/notifications/{notificationId}": { "schema": "Notification", "description": "User notifications" }
+  }
+}
